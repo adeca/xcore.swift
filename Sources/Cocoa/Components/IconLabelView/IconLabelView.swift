@@ -221,7 +221,11 @@ open class IconLabelView: XCView {
     /// The default value is `0`.
     @objc open dynamic var contentInset: UIEdgeInsets {
         get { stackView.layoutMargins }
-        set { stackView.layoutMargins = newValue }
+        set {
+            stackView.layoutMargins = newValue
+            setNeedsLayout()
+            layoutIfNeeded()
+        }
     }
 
     // MARK: - Setup Methods
@@ -240,6 +244,11 @@ open class IconLabelView: XCView {
 
         imageSizeConstraints = NSLayoutConstraint.Size(imageViewContainer.anchor.size.equalTo(imageSize).priority(.stackViewSubview).constraints)
         imagePaddingConstraints = NSLayoutConstraint.Edges(imageView.anchor.edges.equalToSuperview().inset(imageInset).constraints)
+    }
+
+    open override func layoutSubviews() {
+        updateLabelsIntrinsicWidth()
+        super.layoutSubviews()
     }
 
     open override func setNeedsLayout() {
@@ -306,6 +315,12 @@ extension IconLabelView {
         }
 
         stackView.setCustomSpacing(textImageSpacing, after: firstView)
+    }
+
+    private func updateLabelsIntrinsicWidth() {
+        [titleLabel, subtitleLabel].apply {
+            $0.preferredMaxLayoutWidth = axis == .vertical ? bounds.width - contentInset.horizontal : 0
+        }
     }
 }
 
